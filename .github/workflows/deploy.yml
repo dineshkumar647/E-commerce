@@ -20,38 +20,42 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: 22
 
       - name: Install dependencies
         working-directory: client
-        run: npm install
+        run: npm ci
 
-      - name: Build Vite frontend
+      - name: Build frontend
         working-directory: client
         run: npm run build
         env:
           VITE_API_URL: https://e-commerce-33oh.onrender.com/api
 
-      - name: Verify build output
-        run: |
-          test -f client/dist/index.html
-          echo "Vite build successful"
+      - name: Verify build
+        run: test -f client/dist/index.html
 
-      - name: Configure GitHub Pages
+      - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload GitHub Pages artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          name: github-pages
           path: client/dist
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy
+        id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages
